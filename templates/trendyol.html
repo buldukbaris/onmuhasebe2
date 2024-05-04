@@ -1,0 +1,17 @@
+<!-- trendyol.html -->
+
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>Trendyol Sipariş Bilgileri</h1>
+  
+  {% if trendyol_data %}
+    <ul>
+      {% for order_info in trendyol_data %}
+        <li>{{ order_info }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Veri bulunamadı veya çekme hatası oluştu.</p>
+  {% endif %}
+{% endblock %}

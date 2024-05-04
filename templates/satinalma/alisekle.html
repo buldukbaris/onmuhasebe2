@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  <div class="container">
+    <h3 class="text-center">Satın Alma Ekle</h3>
+    <form method="post" class="form-horizontal">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.another_field.id_for_label }}">{{ form.another_field.label }}</label>
+        {{ form.another_field }}
+      </div>
+
+      <!-- Diğer form elemanları için aynı yapıyı kullanabilirsiniz -->
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Gönder</button>
+      </div>
+    </form>
+  </div>
+{% endblock body %}
+

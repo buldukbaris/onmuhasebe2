@@ -1,0 +1,318 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore Satış Kayıt Formu</h3>
+    <div class="container">
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ field.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-primary btn-block">Satışı Kaydet</button>
+                    <a class="btn btn-primary" data-bs-toggle="modal" href="#priceListModal">Fiyat Listesi</a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Geri Dön</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<br>
+<hr>
+<h5 class="mb-4">Toplam Satış Rakamı: {{ toplam_satis_miktari }}</h5>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="start_date">Başlangıç Tarihi:</label>
+    <input type="date" id="start_date" name="start_date">
+
+    <label for="end_date">Bitiş Tarihi:</label>
+    <input type="date" id="end_date" name="end_date">
+
+    <button type="submit">Filtrele</button>
+</form>
+<br>
+<hr>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="GET">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" name="keyword" class="form-control" placeholder="Ürün Adı Ara...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-danger">Ara</button>
+                </div>
+            </div>
+        </form>
+        
+        {% if satislar_list %}
+            <h3>Arama Sonuçları:</h3>
+            <ul>
+                {% for satis in satislar_list %}
+                
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Sonuç bulunamadı.</p>
+        {% endif %}
+        
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="priceListModal" tabindex="-1" aria-labelledby="priceListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="priceListModalLabel">Fiyat Listesi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="productNameInput" placeholder="Ürün Adı">
+            </div>
+            <div class="col-md-4">
+                <input type="number" class="form-control" id="productPriceInput" placeholder="Fiyat (TL)">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-warning" onclick="addProduct()">Ekle</button>
+            </div>
+        </div>
+        <ul id="productList">
+            <!-- Ürünlerin dinamik olarak listeleneceği alan -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="container">
+    <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" style="width: 130px;">Ürün Adı</th>
+                        <th scope="col" style="width: 60px;">Stok Kodu</th>
+                        <th scope="col" style="width: 20px;">Barkod</th>
+                        <th scope="col" style="width: 20px;">Miktar</th>
+                        <th scope="col" style="width: 40px;">Birimi</th>
+                        <th scope="col" style="width: 20px;">Kdv Oranı</th>
+                        <th scope="col" style="width: 80px;">Satış Fiyatı</th>
+                        <th scope="col" style="width: 80px;">Kdv Dahil SF</th>
+                        <th scope="col" style="width: 180px;">Müşteri Cari Adı</th>
+                        <th scope="col" style="width: 60px;">Tutarı</th>
+                        <th scope="col" style="width: 60px;">Kdv Dahil Tutarı</th>
+                        <th scope="col" style="width: 200px;">Açıklama</th>
+                        <th scope="col" style="width: 120px;">Satış Tarihi</th>
+                        <th scope="col" style="width: 180px;"></th>
+                        
+                    </tr>
+                </thead>
+        </table>
+    <div class="container" style="max-height: 500px; overflow-y: auto;">
+    
+        <table class="table table-bordered table-striped">
+            
+            <tbody>
+                {% for satislar in satislar_list %}
+                <tr>
+                    <td>{{ satislar.stok_adi }}</td>
+                    <td>{{ satislar.stok_kodu }}</td>
+                    <td>{{ satislar.barkod }}</td>
+                    <td>{{ satislar.miktar }}</td>
+                    <td>{{ satislar.birimi }}</td>
+                    <td>{{ satislar.kdv_orani }}</td>
+                    <td>{{ satislar.kdvhsatis_fiyati }}</td>
+                    <td>{{ satislar.kdvdsatis_fiyati }}</td>
+                    <td>{{ satislar.cari_adi }}</td>
+                    <td>{{ satislar.tutari_kdvharic }}</td>
+                    <td>{{ satislar.tutari_kdvdahil }}</td>
+                    <td>{{ satislar.aciklama }}</td>
+                    <td>{{ satislar.created_date }}</td>
+                    <td>
+                        <a href="satinalma/update/{{ satislar.id }}" class="btn btn-sm btn-warning">Güncelle</a>
+                        <a href="satinalma/delete/{{ satislar.id }}" class="btn btn-sm btn-danger delete-btn">Sil</a>
+                        <script>
+                        // Silme işlemi butonlarına tıklandığında
+                        document.querySelectorAll('.delete-btn').forEach(button => {
+                            button.addEventListener('click', function(event) {
+                            event.preventDefault(); // Linkin varsayılan davranışını engelle
+
+                            // Kullanıcıya silme işlemini onaylamasını sor
+                        if (confirm('Bu kaydı silmek istediğinizden emin misiniz?')) {
+                            window.location.href = button.getAttribute('href'); // Silme işlemi URL'sine yönlendir
+                            }
+                            });
+                         });
+                        </script>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="priceListModal" tabindex="-1" aria-labelledby="priceListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="priceListModalLabel">Fiyat Listesi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="productNameInput" placeholder="Ürün Adı">
+            </div>
+            <div class="col-md-4">
+                <input type="number" class="form-control" id="productPriceInput" placeholder="Fiyat (TL)">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-warning" onclick="addProduct()">Ekle</button>
+            </div>
+        </div>
+        <ul id="productList">
+            <!-- Ürünlerin dinamik olarak listeleneceği alan -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Ürünleri ve fiyatlarını ekleyen fonksiyon
+// Ürünleri ve fiyatlarını ekleyen fonksiyon
+function addProduct() {
+    var productName = document.getElementById('productNameInput').value.trim();
+    var productPrice = document.getElementById('productPriceInput').value.trim();
+    
+    if (productName === "" || productPrice === "") {
+        alert("Lütfen ürün adı ve fiyatını girin.");
+        return;
+    }
+    
+    var productList = document.getElementById('productList');
+    var newProduct = document.createElement('li');
+    newProduct.innerHTML = productName + " - " + productPrice + " TL";
+    
+    var editButton = document.createElement('button');
+    editButton.innerText = 'Düzelt';
+    editButton.onclick = function() {
+        var newProductName = prompt("Yeni ürün adını girin:", productName);
+        var newProductPrice = prompt("Yeni fiyatı girin:", productPrice);
+        if (newProductName !== null && newProductPrice !== null) {
+            productName = newProductName.trim();
+            productPrice = newProductPrice.trim();
+            newProduct.innerHTML = productName + " - " + productPrice + " TL";
+        }
+    };
+    
+    var deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Sil';
+    deleteButton.onclick = function() {
+        this.parentElement.remove();
+        updateLocalStorage(); // LocalStorage'ı güncelle
+    };
+    
+    newProduct.appendChild(editButton);
+    newProduct.appendChild(deleteButton);
+    productList.appendChild(newProduct);
+
+    // Form içindeki metinleri sil
+    document.getElementById('productNameInput').value = '';
+    document.getElementById('productPriceInput').value = '';
+
+    // Ürün ve fiyatı bir nesne olarak saklayabilir veya başka bir veri yapısına ekleyebilirsiniz
+    var product = {
+        name: productName,
+        price: parseFloat(productPrice)  // Fiyatı sayısal bir değere çeviriyoruz
+    };
+    // Yerel depolamaya ürünü ekle
+    var products = JSON.parse(localStorage.getItem('products')) || [];
+    products.push(product);
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+// LocalStorage'dan ürünleri çeken fonksiyon
+function loadProductsFromLocalStorage() {
+    var productList = document.getElementById('productList');
+    var products = JSON.parse(localStorage.getItem('products')) || [];
+    products.forEach(function(product) {
+        var newProduct = document.createElement('li');
+        newProduct.innerHTML = product.name + " - " + product.price + " TL";
+
+        var editButton = document.createElement('button');
+        editButton.innerText = 'Düzelt';
+        editButton.onclick = function() {
+            var newProductName = prompt("Yeni ürün adını girin:", product.name);
+            var newProductPrice = prompt("Yeni fiyatı girin:", product.price);
+            if (newProductName !== null && newProductPrice !== null) {
+                product.name = newProductName.trim();
+                product.price = parseFloat(newProductPrice.trim());
+                newProduct.innerHTML = product.name + " - " + product.price + " TL";
+                updateLocalStorage(); // LocalStorage'ı güncelle
+            }
+        };
+
+        var deleteButton = document.createElement('button');
+        deleteButton.innerText = 'Sil';
+        deleteButton.onclick = function() {
+            this.parentElement.remove();
+            updateLocalStorage(); // LocalStorage'ı güncelle
+        };
+
+        newProduct.appendChild(editButton);
+        newProduct.appendChild(deleteButton);
+        productList.appendChild(newProduct);
+    });
+}
+
+// LocalStorage'ı güncelleyen fonksiyon
+function updateLocalStorage() {
+    var productList = document.getElementById('productList');
+    var products = [];
+    productList.querySelectorAll('li').forEach(function(item) {
+        var parts = item.innerText.split(' - ');
+        var name = parts[0].trim();
+        var price = parseFloat(parts[1].replace('TL', '').trim());
+        products.push({ name: name, price: price });
+    });
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+// Sayfa yüklendiğinde LocalStorage'dan ürünleri yükleyen fonksiyonu çağır
+window.onload = function() {
+    loadProductsFromLocalStorage();
+};
+
+
+</script>
+
+
+
+{% else %}
+<script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+{% endblock body %}

@@ -1,0 +1,327 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}
+    <h3>Kontrol Paneli</h3>
+    <hr>
+    
+    Hoş Geldiniz, {{ request.user.username }}, {{ current_datetime }}
+
+
+
+    
+  
+    <hr>
+
+    <a class="btn btn-danger" href="/satinalma/alisekle">Satın Alma</a>
+    <a class="btn btn-danger" href="/satislar/satisekle">Satışlar</a>
+    <a class="btn btn-danger" href="/cari_ekle">Cari Kayıt</a>
+    <a class="btn btn-danger" href="/sakiz">Sakız Makinesi</a>
+    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Oturumu Kapat</button>
+    </form>
+    <br><br>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-2">
+            <label for="num1">Ürün Satış Fiyatı:</label>
+            <input type="number" class="form-control" id="num1" name="num1" oninput="calculate()">
+            <!-- KDV Hariç Satış Fiyatı -->
+            <p>Kdv Hariç Satış Fiyatı: <span id="displayNum1">0</span></p>
+            <!-- Kar -->
+            <p><strong>Kar <span id="karResult">0</span></strong></p>
+        </div>
+
+        <div class="col-md-2">
+            <label for="num2">Ürün Alış Fiyatı:</label>
+            <input type="number" class="form-control" id="num2" name="num2" oninput="calculate()">
+            <!-- KDV Hariç Alış Fiyatı -->
+            <p>Kdv Hariç Alış Fiyatı: <span id="displayNum2">0</span></p>
+            <!-- Kar Oranı -->
+            <p><strong>Kar Oranı (%): <span id="karOrani">0</span></strong></p>
+        </div>
+
+        <div class="col-md-2">
+            <label for="num3">Komisyon (%):</label>
+            <input type="number" class="form-control" id="num3" name="num3" oninput="calculate()">
+            <!-- Ödenen Komisyon -->
+            <p>Ödenen Komisyon: <span id="displayNum3">0</span></p>
+            <!-- Komisyon KDV -->
+            <p>Komisyon Kdv: <span id="komisyonKdv">0</span></p>
+        </div>
+
+        <div class="col-md-2">
+            <label for="num4">Kdv Oranı (%):</label>
+            <input type="number" class="form-control" id="num4" name="num4" oninput="calculate()" value="20">
+            <!-- KDV Tutarı -->
+            <p>Kdv Tutarı: <span id="displayNum4">0</span></p>
+        </div>
+
+        <div class="col-md-2">
+            <label for="num5">Kargo Ücreti:</label>
+            <input type="number" class="form-control" id="num5" name="num5" oninput="calculate()">
+            <!-- KDV Hariç Kargo Fiyatı -->
+            <p>Kdv Hariç Kargo Fiyatı: <span id="displayNum5">0</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+
+<!-- Yeni label ve input alanı -->
+        <div class="col-md-2">
+            <label for="kdvorani">KDV Hariç Fiyat (%):</label>
+            <input type="number" class="form-control" id="kdvorani" name="kdvorani" oninput="calculate()">
+            <!-- Yeni hesaplama sonucunu gösteren alan -->
+            <p>Kdv Dahil Fiyat: <span id="yeniHesaplamaSonuc">0</span></p>
+        </div>
+        <div class="col-md-2">
+            <label for="kdvorani">Bozuk Para Komisyon (%):</label>
+            <input type="number" class="form-control" id="num6" name="bozukpara" oninput="calculate()">
+            <!-- Yeni hesaplama sonucunu gösteren alan -->
+            <p>Bozuk Para Komisyon: <span id="yeniHesaplamaSonuc2">0</span></p>
+        </div>
+        <div class="col-md-2">
+            <label for="prev_km">Önceki Kilometre:</label>
+            <input type="number" class="form-control" id="prev_km" name="prev_km" oninput="calculate()">
+        </div>
+        <div class="col-md-2">
+            <label for="current_km">Mevcut Kilometre:</label>
+            <input type="number" class="form-control" id="current_km" name="current_km" oninput="calculate()">
+        </div>
+        <div class="col-md-2">
+            <label for="fuel_cost">Ödediğiniz Tutar:</label>
+            <input type="number" class="form-control" id="fuel_cost" name="fuel_cost" oninput="calculate()">
+            <p>Yakıt Tüketimi (Km/L): <span id="fuel_consumption">0</span></p>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    function calculate() {
+        var num1 = document.getElementById('num1').valueAsNumber || 0; // satış fiyatı
+        var num2 = document.getElementById('num2').valueAsNumber || 0; // alış fiyatı
+        var num3 = document.getElementById('num3').valueAsNumber || 0; // komisyon oranı
+        var num4 = document.getElementById('num4').valueAsNumber || 0; // kdv oranı
+        var num5 = document.getElementById('num5').valueAsNumber || 0; // kargo ücreti
+        var kdvorani = document.getElementById('kdvorani').valueAsNumber || 0; // yeni eklenen kdvorani
+        var num6 = document.getElementById('num6').valueAsNumber || 0;
+            // Yakıt tüketimi hesaplaması için:
+        var prevKm = parseFloat(document.getElementById('prev_km').value);
+        var currentKm = parseFloat(document.getElementById('current_km').value);
+        var fuelCost = parseFloat(document.getElementById('fuel_cost').value);
+
+        if (!isNaN(prevKm) && !isNaN(currentKm) && !isNaN(fuelCost) && currentKm > prevKm) {
+            var distance = currentKm - prevKm;
+            var fuelConsumption = fuelCost / distance;
+
+            document.getElementById('fuel_consumption').innerText = fuelConsumption.toFixed(2);
+        } else {
+            document.getElementById('fuel_consumption').innerText = "0";
+        }
+
+
+        var num1Divided = (num1 / ((100 + num4) / 100)).toFixed(2); //kdv hariç satış fiyatı
+        var num2Divided = (num2 / ((100 + num4) / 100)).toFixed(2); //kdv hariç alış fiyatı
+        var komisyon = (num1 * (num3 / 100)).toFixed(2); //komisyon TL
+        var komisyonKdv = (komisyon / 1.20).toFixed(2); //komisyon kdv
+        var num4Divided = (num1 * (num4 / 100)).toFixed(2); //kdv tutarı
+        var num5Divided = (num5 / 1.20).toFixed(2); //kdv hariç kargo
+
+        var result = num1 - num2 - num5 - komisyon - 5.99 - ((num1 - num1Divided) - (num2 - num2Divided) - (komisyon - komisyonKdv) - (num5 - num5Divided) - 1);
+        var karOrani = ((result / num2) * 100).toFixed(2); // Kar oranını hesapla
+        var yeniHesaplama = (kdvorani * (100 + num4)/100).toFixed(2);
+        var yeniHesaplama2 = (num6 * 1.05).toFixed(2);
+
+        document.getElementById('displayNum1').innerText = num1Divided;
+        document.getElementById('displayNum2').innerText = num2Divided;
+        document.getElementById('displayNum3').innerText = komisyon;
+        document.getElementById('komisyonKdv').innerText = komisyonKdv;
+        document.getElementById('displayNum4').innerText = num4Divided;
+        document.getElementById('displayNum5').innerText = num5Divided;
+        document.getElementById('karOrani').innerText = karOrani;
+        document.getElementById('karResult').innerText = result.toFixed(2);
+        document.getElementById('yeniHesaplamaSonuc').innerText = yeniHesaplama;
+        document.getElementById('yeniHesaplamaSonuc2').innerText = yeniHesaplama2;
+    }
+</script>
+
+<script>
+    function calculateAndSave() {
+        var current_km = document.getElementById('current_km').valueAsNumber || 0;
+        var prev_km = document.getElementById('prev_km').valueAsNumber || 0;
+        var fuel_cost = document.getElementById('fuel_cost').valueAsNumber || 0;
+
+        var distance_traveled = current_km - prev_km;
+        var fuel_consumption = distance_traveled > 0 ? (fuel_cost / distance_traveled).toFixed(2) : 0;
+
+        document.getElementById('fuel_consumption').innerText = fuel_consumption;
+
+        // AJAX ile Django view'a veri gönderme
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/save_fuel_data/', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                console.log('Başarıyla kaydedildi:', xhr.responseText);
+            } else {
+                console.error('Hata:', xhr.statusText);
+            }
+        };
+        xhr.send('current_km=' + current_km + '&prev_km=' + prev_km + '&fuel_cost=' + fuel_cost + '&fuel_consumption=' + fuel_consumption);
+    }
+</script>
+
+<hr>
+<h4>ToDoList</h4>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <form id="todoForm" class="form-inline">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control" id="todoInput" name="todoText" placeholder="Yapılacak iş...">
+                    <div class="input-group-append" style="margin-left: 10px;">
+                        <button type="button" class="btn btn-warning" onclick="addTodo()">Ekle</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
+    <!-- Yapılacaklar listesi -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <ul id="todoList">
+                <!-- Burada dinamik olarak oluşturulan todo listesi yer alacak -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function addTodo() {
+    var todoText = document.getElementById('todoInput').value.trim();
+    
+    if (todoText === "") {
+        alert("Lütfen bir metin girin.");
+        return;
+    }
+    
+    var todoList = document.getElementById('todoList');
+    var newTodo = document.createElement('li');
+    newTodo.innerText = todoText;
+    
+    var deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Sil';
+    deleteButton.onclick = function() {
+        this.parentElement.remove();
+        updateLocalStorage();  // LocalStorage'ı güncelle
+    };
+    
+    newTodo.appendChild(deleteButton);
+    todoList.appendChild(newTodo);
+
+    // Form içindeki metni sil
+    document.getElementById('todoInput').value = '';
+    
+    updateLocalStorage();  // LocalStorage'ı güncelle
+    
+    // AJAX ile Django'ya veriyi gönderme
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/add_todo/', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log('Başarıyla eklendi:', xhr.responseText);
+        } else {
+            console.error('Hata:', xhr.statusText);
+        }
+    };
+    
+    var formData = new FormData(document.getElementById('todoForm'));
+    xhr.send(new URLSearchParams(formData).toString());
+}
+
+// LocalStorage'ı güncelleyen fonksiyon
+function updateLocalStorage() {
+    var todoItems = [];
+    var todoList = document.getElementById('todoList').getElementsByTagName('li');
+    
+    for (var i = 0; i < todoList.length; i++) {
+        todoItems.push(todoList[i].innerText.replace('Sil', '').trim());
+    }
+    
+    localStorage.setItem('todos', JSON.stringify(todoItems));
+}
+
+// Sayfa yüklendiğinde LocalStorage'dan verileri çeken fonksiyon
+window.onload = function() {
+    var storedTodos = JSON.parse(localStorage.getItem('todos'));
+    
+    if (storedTodos) {
+        storedTodos.forEach(function(todoText) {
+            addToDoItem(todoText);
+        });
+    }
+}
+
+// Veriyi listeye ekleyen fonksiyon
+function addToDoItem(todoText) {
+    var todoList = document.getElementById('todoList');
+    var newTodo = document.createElement('li');
+    newTodo.innerText = todoText;
+    
+    var deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Sil';
+    deleteButton.onclick = function() {
+        this.parentElement.remove();
+        updateLocalStorage();  // LocalStorage'ı güncelle
+    };
+    
+    newTodo.appendChild(deleteButton);
+    todoList.appendChild(newTodo);
+}
+
+</script>
+
+
+
+
+
+1.Fiyat Takip Programını Django Programına Entegre Et
+2.Döviz Kurlarını ve bitcoin değerlerini anlık olarak getiren bir webscraping Yap
+3.trendyol stoklarını otomatik olarak sisteme çeken bir program yaz
+4.satın alma, satışlar, sakız makinesi ve carileri bir tek butonla veritabanından otomatik olarak excele çekebilme özelliği kazandır.
+5.Oturum Kontrolünü Ayarla
+
+
+
+
+
+
+
+    
+{% else %}
+    <!-- Kullanıcı oturum açmamışsa index sayfasına yönlendir -->
+    <script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+{% endblock body %}

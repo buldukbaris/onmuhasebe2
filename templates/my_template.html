@@ -1,0 +1,39 @@
+<!-- templates/my_template.html -->
+
+{% extends "layout.html" %}
+
+{% block body %}
+<br><br><br>
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore</h3>
+
+    <!-- index.html -->
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                {% for field in form %}
+                    {{ field }}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-danger">Giriş Yap</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<!-- index.html -->
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% endblock body %}

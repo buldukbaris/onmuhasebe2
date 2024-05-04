@@ -1,0 +1,189 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<p></p>
+{% if user.is_authenticated %}
+
+    <div>
+        <span id="tarihGoster"></span>
+    </div>
+
+
+<!-- sakiz.html -->
+
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore Sakız Makinesi Programı</h3>
+
+    <!-- index.html -->
+    <div class="container">
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ field.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-danger btn-block">Ciro Kaydet</button>
+                    <a href="{% url 'satisekle' %}" class="btn btn-warning btn-block">Satış Yap</a>
+                    <!-- Cari Kayıt butonu eklendi -->
+                    <a href="{% url 'cari_form' %}" class="btn btn-primary btn-block">Cari Kayıt</a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Geri Dön</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<br>
+<hr>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="GET">
+            {% csrf_token %}
+            <input type="text" name="keyword" class="input-sm" maxlength="64" placeholder="Cari Adı Ara...">
+            <button type="submit" class="btn btn-danger">Ara</button>
+        </form>
+        
+        {% if sakizmakinesi_list %}
+            <h3>Arama Sonuçları:</h3>
+            <ul>
+                {% for sakiz in sakizmakinesi_list %}
+
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Sonuç bulunamadı.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- Sakiz.html -->
+
+<!-- Diğer HTML kodları... -->
+
+
+            <tr>
+                <th>Günlük Ciro</th>
+                <th>Toplam Ciro (Bayi)</th>
+            </tr>
+            {% for ciro in toplam_ciro_gun %}
+                <tr>
+                    <td>{{ ciro.created_date }}</td>  <!-- Değişiklik burada -->
+                    <td>{{ ciro.toplam_ciro }}</td>
+                </tr>
+            {% endfor %}
+            <br>
+            <tr>
+                <th>Aylık Ciro</th>
+                <th>Toplam Ciro (Bayi)</th>
+            </tr>
+            {% for ciro in ciro_ay %}
+                <tr>
+                    <td>{{ ciro.created_date|date:"F" }}</td>  <!-- Değişiklik burada -->
+                    <td>{{ ciro.toplam_ciro }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+            <br>
+                <th>Yıllık Ciro</th>
+                <th>Toplam Ciro (Bayi)</th>
+            
+            {% for ciro in ciro_yil %}
+                <tr>
+                    <td>{{ ciro.created_date|date:"Y" }}</td>  <!-- Değişiklik burada -->
+                    <td>{{ ciro.toplam_ciro }}</td>
+                </tr>
+            {% endfor %}
+        
+
+
+
+
+<!-- Diğer HTML kodları... -->
+
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" style="width: 12%;">Cari Adı</th>
+                        <th scope="col" style="width: 10%;">Top Ciro Kg</th>
+                        <th scope="col" style="width: 10%;">Top Ciro TL</th>
+                        <th scope="col" style="width: 10%;">Bayi Ciro Kg</th>
+                        <th scope="col" style="width: 8%;">Bayi Ciro TL</th>
+                        <th scope="col" style="width: 8%;">Bul Ciro TL</th>
+                        <th scope="col" style="width: 4%;">Verilen TL</th>
+                        <th scope="col" style="width: 4%;">Açılan Sakız</th>
+                        <th scope="col" style="width: 4%;">Açılan Top</th>
+                        <th scope="col" style="width: 2%;">Oyuncak</th>
+                        <th scope="col" style="width: 2%;">Makine No</th>
+                        <th scope="col" style="width: 4%;">Açıklama</th>
+                        <th scope="col" style="width: 22%;">Açılma Tarihi</th>
+                        <th scope="col" style="width: 20%;">İşlemler</th>
+                    </tr>
+                </thead>
+        </table>
+        <div class="scroll-container" style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-bordered table-striped">
+                
+                <tbody>
+                    {% for sakizmakinesi in sakizmakinesi_list %}
+                        <tr>
+                            <td>{{ sakizmakinesi.cari }}</td>
+                            <td>{{ sakizmakinesi.ciroToplam }}</td>
+                            <td>{{ sakizmakinesi.ciroTL }}</td>
+                            <td style="font-weight: bold; color: blue;">{{ sakizmakinesi.ciroBayi }}</td>
+                            <td>{{ sakizmakinesi.ciroBayiTL }}</td>
+                            <td style="font-weight: bold; color: red;">{{ sakizmakinesi.ciroBuldukTL }}</td>
+                            <td>{{ sakizmakinesi.verilenTL }}</td>
+                            <td>{{ sakizmakinesi.acilanSakiz }}</td>
+                            <td>{{ sakizmakinesi.acilanTop }}</td>
+                            <td>{{ sakizmakinesi.verilenOyuncak }}</td>
+                            <td>{{ sakizmakinesi.makineNo }}</td>
+                            <td>{{ sakizmakinesi.aciklama }}</td>
+                            <td>{{ sakizmakinesi.created_date}}</td>
+                            <td>
+                                <a href="{% url 'update_sakiz' sakizmakinesi.id %}" class="btn btn-sm btn-danger">Güncelle</a>
+                                <a href="{% url 'delete_sakiz' sakizmakinesi.id %}" class="btn btn-sm btn-danger">Sil</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% else %}
+    <!-- Kullanıcı oturum açmamışsa index sayfasına yönlendir -->
+    <script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+
+<script>
+        // JavaScript ile tarih bilgisini al
+        var currentDate = new Date();
+        var formattedDate =  currentDate.getDate() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getFullYear();
+
+        // Tarihi bir HTML elemanına ekle
+        document.getElementById('tarihGoster').innerText = formattedDate;
+    </script>
+
+{% endblock body %}

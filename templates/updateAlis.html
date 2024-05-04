@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}
+<br><br><br>
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore Satın Alma Güncelleme Formu</h3>
+
+    <!-- index.html -->
+    <div class="container">
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ field.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-danger btn-block">Satın Alma Güncelle</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Geri Dön</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- index.html -->
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<br>
+<hr>
+
+{% else %}
+    <!-- Kullanıcı oturum açmamışsa index sayfasına yönlendir -->
+    <script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+
+{% endblock body %}

@@ -1,0 +1,241 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}
+<br><br><br>
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore Satın Alma Kayıt Formu</h3>
+
+    <!-- index.html -->
+    <div class="container">
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ field.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-danger btn-block">Satın Alma Kaydet</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#priceListModal">
+  Fiyat Teklifleri
+</button>
+
+                    
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Geri Dön</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- index.html -->
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<br>
+<hr>
+<div class="row">
+    <div class="col-lg-8">
+        <form method="GET">
+            {% csrf_token %}
+            <input type="text" name="keyword" class="input-sm" maxlength="64" placeholder="Ürün Adı Ara...">
+            <button type="submit" class="btn btn-danger">Ara</button>
+        </form>
+
+        
+        
+        {% if satinalma_list %}
+            <h3>Arama Sonuçları:</h3>
+            <ul>
+                {% for satinalma in satinalma_list %}
+                
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Sonuç bulunamadı.</p>
+        {% endif %}
+ 
+
+    </div>
+</div>
+
+
+
+<div class="container">
+    <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+    <thead>
+            <tr>
+                <th scope="col" style="width: 160px;">Ürün Adı</th>
+                <th scope="col" style="width: 20px;">Stok Kodu</th>
+                <th scope="col" style="width: 100px;">Barkod</th>
+                <th scope="col" style="width: 20px;">Miktar</th>
+                <th scope="col" style="width: 20px;">Birimi</th>
+                <th scope="col" style="width: 20px;">Kdv Oranı</th>
+                <th scope="col" style="width: 20px;">Alış Fiyatı</th>
+                <th scope="col" style="width: 20px;">Kdv Dahil AF</th>
+                <th scope="col"style="width: 100px;">Cari Adı</th>
+                <th scope="col" style="width: 20px;">Tutarı</th>
+                <th scope="col" style="width: 20px;">Kdv Dahil Tutarı</th>
+                <th scope="col" style="width: 50px;">Açıklama</th>
+                <th scope="col"style="width: 100px;">Satın Alma Tarihi</th>
+                <th scope="col" style="width: 130px;">İşlemler</th>
+            </tr>
+        </thead>
+    </table>
+    <div class="container" style="max-height: 500px; overflow-y: auto;">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+
+        <tbody>
+            {% for satinalma in satinalma_list %}
+                <tr>
+                    <!-- ... (diğer sütunlar) ... -->
+                    <td>{{ satinalma.stok_adi }}</td>
+                    <td>{{ satinalma.stok_kodu }}</td>
+                    <td>{{ satinalma.barkod }}</td>
+                    <td>{{ satinalma.miktar }}</td>
+                    <td>{{ satinalma.birimi }}</td>
+                    <td>{{ satinalma.kdv_orani }}</td>
+                    <td>{{ satinalma.kdvhalis_fiyati }}</td>
+                    <td>{{ satinalma.kdvdalis_fiyati }}</td>
+                    <td>{{ satinalma.cari_adi }}</td>
+                    <td>{{ satinalma.tutari_kdvharic }}</td>
+                    <td>{{ satinalma.tutari_kdvdahil }}</td>
+                    <td>{{ satinalma.aciklama }}</td>
+                    <td>{{ satinalma.created_date}}</td>
+                    <td>
+                        <a href="{% url 'update_alislar' id=satinalma.id %}" class="btn btn-sm btn-warning">Güncelle</a>
+                        <a href="{% url 'delete_alislar' id=satinalma.id %}" class="btn btn-sm btn-danger delete-btn">Sil</a>
+                        <script>
+                        // Silme işlemi butonlarına tıklandığında
+                        document.querySelectorAll('.delete-btn').forEach(button => {
+                            button.addEventListener('click', function(event) {
+                            event.preventDefault(); // Linkin varsayılan davranışını engelle
+
+                            // Kullanıcıya silme işlemini onaylamasını sor
+                        if (confirm('Bu kaydı silmek istediğinizden emin misiniz?')) {
+                            window.location.href = button.getAttribute('href'); // Silme işlemi URL'sine yönlendir
+                            }
+                            });
+                         });
+                        </script>
+
+
+                    </td>
+
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="priceListModal" tabindex="-1" aria-labelledby="priceListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="priceListModalLabel">Ürün ve Miktar Ekle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="productNameInput" placeholder="Ürün Adı">
+            </div>
+            <div class="col-md-4">
+                <input type="number" class="form-control" id="productQuantityInput" placeholder="Miktar">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-warning" onclick="addProduct()">Ekle</button>
+            </div>
+        </div>
+        <ul id="productList">
+            <!-- Ürünlerin dinamik olarak listeleneceği alan -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function addProduct() {
+    var productName = document.getElementById('productNameInput').value.trim();
+    var productQuantity = document.getElementById('productQuantityInput').value.trim();
+    
+    if (productName === "" || productQuantity === "") {
+        alert("Lütfen ürün adı ve miktarını girin.");
+        return;
+    }
+    
+    var productList = document.getElementById('productList');
+    var newProduct = document.createElement('li');
+    newProduct.innerHTML = productName + " - Miktar: " + productQuantity;
+    
+    var editButton = document.createElement('button');
+    editButton.innerText = 'Düzelt';
+    editButton.onclick = function() {
+        var newProductName = prompt("Yeni ürün adını girin:", productName);
+        var newProductQuantity = prompt("Yeni miktarı girin:", productQuantity);
+        if (newProductName !== null && newProductQuantity !== null) {
+            productName = newProductName.trim();
+            productQuantity = newProductQuantity.trim();
+            newProduct.innerHTML = productName + " - Miktar: " + productQuantity;
+        }
+    };
+    
+    var deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Sil';
+    deleteButton.onclick = function() {
+        this.parentElement.remove();
+        updateLocalStorage(); // LocalStorage'ı güncelle
+    };
+    
+    newProduct.appendChild(editButton);
+    newProduct.appendChild(deleteButton);
+    productList.appendChild(newProduct);
+
+    // Form içindeki metinleri sil
+    document.getElementById('productNameInput').value = '';
+    document.getElementById('productQuantityInput').value = '';
+
+    // Ürün ve miktarı bir nesne olarak saklayabilir veya başka bir veri yapısına ekleyebilirsiniz
+    var product = {
+        name: productName,
+        quantity: parseInt(productQuantity)  // Miktarı sayısal bir değere çeviriyoruz
+    };
+    // Yerel depolamaya ürünü ekle
+    var products = JSON.parse(localStorage.getItem('products')) || [];
+    products.push(product);
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+
+</script>
+
+
+
+
+
+{% else %}
+    <!-- Kullanıcı oturum açmamışsa index sayfasına yönlendir -->
+    <script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+
+{% endblock body %}

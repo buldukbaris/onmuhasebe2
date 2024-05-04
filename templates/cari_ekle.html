@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+<style>
+.fixed-header th {
+    position: sticky;
+    top: 0;
+    background-color: #f5f5f5;
+    z-index: 10;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{% if user.is_authenticated %}
+<br><br><br>
+
+<div class="jumbotron bg-light text-center">
+    <h3 class="mb-4">BuldukStore Cari Kayıt Formu</h3>
+
+    <div class="container">
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ field.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="form-group row justify-content-center">
+                <div class="text-center">
+                    <button type="submit" class="btn btn-danger">Cari Kaydet</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-block">Geri Dön</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<br>
+<hr>
+<div class="row">
+    <div class="col-lg-8">
+        <form method="GET">
+            {% csrf_token %}
+            <input type="text" name="keyword" class="input-sm" maxlength="64" placeholder="Cari Adı Ara...">
+            <button type="submit" class="btn btn-danger">Ara</button>
+        </form>
+        {% if cari_list %}
+            <ul>
+                {% for cari in cari_list %}
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Sonuç bulunamadı.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark fixed-header">
+                <tr>
+                    <th scope="col" style="width: 90px;">Cari Adı</th>
+                    <th scope="col" style="width: 100px;">Vergi Dairesi</th>
+                    <th scope="col" style="width: 120px;">Vergi No</th>
+                    <th scope="col" style="width: 120px;">Telefon</th>
+                    <th scope="col" style="width: 210px;">E-Mail</th>
+                    <th scope="col" style="width: 180px;">Adres</th>
+                    <th scope="col" style="width: 60px;">Cari Durum</th>
+                    <th scope="col" style="width: 60px;">Borç Miktarı</th>
+                    <th scope="col" style="width: 60px;">Alacak Miktarı</th>
+                    <th scope="col" style="width: 60px;">Bakiye</th>
+                    <th scope="col" style="width: 60px;">Kayıt Tarihi</th>
+                    <th scope="col" style="width: 110px;"></th>
+                </tr>
+            </thead>
+        </table>
+        <div class="scroll-container" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-bordered table-striped">
+                <tbody>
+                    {% for cari in cari_list %}
+                        <tr>
+                            <!-- ... (diğer sütunlar) ... -->
+                            <td style="width: 90px;">{{ cari.cari_adi }}</td>
+                            <td style="width: 100px;">{{ cari.vergi_dairesi }}</td>
+                            <td style="width: 120px;">{{ cari.vergi_no }}</td>
+                            <td style="width: 120px;">{{ cari.telefon }}</td>
+                            <td style="width: 210px;">{{ cari.email }}</td>
+                            <td style="width: 180px;">{{ cari.adres }}</td>
+                            <td style="width: 60px;">{{ cari.cariDurum }}</td>
+                            <td style="width: 60px;">{{ cari.Borc }}</td>
+                            <td style="width: 60px;">{{ cari.Alacak }}</td>
+                            <td style="width: 60px;">{{ cari.Bakiye }}</td>
+                            <td style="width: 60px;">{{ cari.created_date}}</td>
+                            <td>
+                                <a href="{% url 'update_cariler' id=cari.id %}" class="btn btn-sm btn-warning">Güncelle</a>
+                                <a href="{% url 'delete_cariler' id=cari.id %}" class="btn btn-sm btn-danger delete-btn">Sil</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<style>
+.scroll-container {
+    margin-top: -1px; /* veya 0px olarak ayarlayarak deneyin */
+}
+</style>
+
+{% else %}
+    <script>window.location.href = "{% url 'index' %}";</script>
+{% endif %}
+
+{% endblock body %}

@@ -1,0 +1,6 @@
+{% with widget|attr:'attrs' as attrs %}
+    <div class="mb-3">
+        <label for="{{ widget.id_for_label }}">{{ attrs.label }}</label>
+        {{ widget }}
+    </div>
+{% endwith %}

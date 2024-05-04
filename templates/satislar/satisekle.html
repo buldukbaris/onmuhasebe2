@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="jumbotron bg-light text-center">
+  <div class="container">
+    <h3 class="text-center">Satış Ekle</h3>
+    <form method="post" class="form-horizontal" action="{% url 'satisekle' %}">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="{{ form.stok_adi.id_for_label }}" class="form-label">{{ form.stok_adi.label }}</label>
+        {{ form.stok_adi }}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.stok_kodu.id_for_label }}" class="form-label">{{ form.stok_kodu.label }}</label>
+        {{ form.stok_kodu }}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.barkod.id_for_label }}" class="form-label">{{ form.barkod.label }}</label>
+        {{ form.barkod }}
+      </div>
+
+      <!-- Diğer form elemanları için aynı yapıyı kullanabilirsiniz -->
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-danger">Satışı Kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+  
+
+      
+    
+   
+
+
+      <!-- Satışlar listesini göstermek için bir tablo ekleyebilirsiniz -->
+      <table class="table mt-4">
+        <thead>
+          <tr>
+            <th>Ürün</th>
+            <th>Miktar</th>
+            <th>Fiyat</th>
+            <th>KDV Tipi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for satis in satislar_list %}
+            <tr>
+              <td>{{ satis.urun }}</td>
+              <td>{{ satis.miktar }}</td>
+              <td>{{ satis.fiyat }}</td>
+              <td>{{ satis.kdv_tipi }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock body %}
